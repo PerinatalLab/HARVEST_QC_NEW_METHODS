@@ -249,6 +249,7 @@ write.table(reff,reff_freqs,row.names=F,col.names=T,quote=F,sep="\t")
 
 
 # cleanup
-cmnd7 = paste("rm",temp_file_rix,temp_file_hap, temp_file_rndPhe, temp_file_gntpCnts,sep=" ")
+cmnd7 = paste("rm ",temp_file_rix,"* ",temp_file_hap,"* ",temp_file_rndPhe,"* ",temp_file_gntpCnts,"* ",
+              study_data_dpl,"* ",study_data_oth,"* ",sep=" ")
 system(cmnd7,intern = F)
 
