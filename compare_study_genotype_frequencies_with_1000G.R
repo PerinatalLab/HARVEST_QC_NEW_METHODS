@@ -248,12 +248,11 @@ colnames(KGgntpFrq)=c("AA","AB","BB")
 #head(KGgntpFrq)
 
 
-
 # inversion of genotypes counts (to make it comparable with PLINK's output enforce that minor woud be on the left)
-# rix_inv = which(leg$EUR<0.5) # rows that need genotype inversion (only for March 2012 version)
+rix_inv = which(leg$EUR>0.5) # rows that need genotype inversion
 tmp = KGgntpFrq
-KGgntpFrq[,1] = tmp[,3]
-KGgntpFrq[,3] = tmp[,1]
+KGgntpFrq[rix_inv,1] = tmp[rix_inv,3]
+KGgntpFrq[rix_inv,3] = tmp[rix_inv,1]
 rm(tmp)
 
 print(paste("AA>BB ",sum(KGgntpFrq[,1]>KGgntpFrq[,3]),sep=""))
