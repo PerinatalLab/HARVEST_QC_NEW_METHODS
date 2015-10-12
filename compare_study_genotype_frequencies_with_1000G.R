@@ -63,7 +63,7 @@ parent = read.table(recode_parent,h=F,stringsAsFactors = F)
 # update genetic file
 cmnd01 = paste(plink," --bfile ",study_data_fil," --update-ids ",famids," --chr ",chr," --make-bed --out ",temp_genet,"_1",sep="")
 cmnd02 = paste(plink," --bfile ",temp_genet,"_1 --update-sex ",gender," --make-bed --out ",temp_genet,"_2",sep="")
-cmnd03 = paste(plink," --bfile ",temp_genet,"_2 --update-parents ",parents," --make-bed --out ",temp_genet,"_3",sep="")
+cmnd03 = paste(plink," --bfile ",temp_genet,"_2 --update-parents ",parent," --make-bed --out ",temp_genet,"_3",sep="")
 system(cmnd01,intern = F)
 system(cmnd02,intern = F)
 system(cmnd03,intern = F)
