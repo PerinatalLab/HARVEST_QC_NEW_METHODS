@@ -5,9 +5,10 @@
 # European genotype frequencies from 1000 Genomes Project
 #  by Jonas Bacelis. 2015 Oct 11-12
 
+# select the chromosome to work on
 chr = 22
 
-### define the locations and names
+### define the locations and name of the PLINK program
 plink = "/home/jonasbac/results/moba24-reference-script_5010jb/plink"
 
 ### inputs
@@ -19,6 +20,10 @@ study_data_fil = paste(study_data_dir,study_data_root,sep="")
 study_dupl_ind = paste(study_data_dir,"duplicated_individuals.txt",sep="")
 # what are the duplicate pairs (which individual belongs to which individual)
 study_dupl_match = "/media/local-disk/common/gsexport/moba_24v10_n12874inc135regdup9dualdup/SentrixIDs_moba24_135regdup.txt"
+# other files for updating info
+recode_famids = "/media/local-disk/common/gsexport/recode-famid-total-moba.fam"
+recode_gender = "/media/local-disk/common/gsexport/recode-sex-total-moba.fam"
+recode_parent = "/media/local-disk/common/gsexport/recode-parents-total-moba.fam"
 
 ### outputs
 working_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/WORK/"
@@ -29,6 +34,7 @@ temp_file_rix = paste(working_dir,"tempFile_whichRowsToKeep.txt",sep="")
 temp_file_hap = paste(working_dir,"tempFile_extracted_1kGhap.txt",sep="")
 temp_file_rndPhe =  paste(working_dir,"tempFile_randomPhenotype_nonDuplSmpls.txt",sep="")
 temp_file_gntpCnts = paste(working_dir,"tempFile_gntpCounts_nonDuplInds_onlyFounders",sep="")
+temp_genet = paste(working_dir,"tempFile_updatingGeneticFile",sep="")
 # result outputs
 reff_freqs              = paste(working_dir,study_data_root,"_1000Greference_gntpFrequencies_chr",chr,".txt",sep="")
 study_dupl_freqs        = paste(working_dir,study_data_root,"_studyDuplSamples_concordances_chr",chr,".txt",sep="")
@@ -49,9 +55,23 @@ reff_data_haplot = paste(reff_data_dir,"1000GP_Phase3_chr",chr,".hap",sep="") # 
 
 ########### START
 
+# read the update-information  
+famids = read.table(recode_famids,h=F,stringsAsFactors = F)
+gender = read.table(recode_gender,h=F,stringsAsFactors = F)
+parent = read.table(recode_parent,h=F,stringsAsFactors = F)
+
+# update genetic file
+cmnd01 = paste(plink," --bfile ",study_data_fil," --update-ids ",famids," --chr ",chr," --make-bed --out ",temp_genet,"_1",sep="")
+cmnd02 = paste(plink," --bfile ",temp_genet,"_1 --update-sex ",gender," --make-bed --out ",temp_genet,"_2",sep="")
+cmnd03 = paste(plink," --bfile ",temp_genet,"_2 --update-parents ",parents," --make-bed --out ",temp_genet,"_3",sep="")
+system(cmnd01,intern = F)
+system(cmnd02,intern = F)
+system(cmnd03,intern = F)
+
+
 ### extract relevant study data to a non-binary format
-cmnd1 = paste(plink, "--bfile",study_data_fil,"--chr",chr,"--keep",study_dupl_ind,"--recode12 --out",study_data_dpl,sep=" ")
-cmnd2 = paste(plink, "--bfile",study_data_fil,"--chr",chr,"--remove",study_dupl_ind,"--make-bed --out",study_data_oth,sep=" ")
+cmnd1 = paste(plink, " --bfile ",temp_genet,"_3 --keep ",  study_dupl_ind," --recode12 --out ",study_data_dpl,sep="")
+cmnd2 = paste(plink, " --bfile ",temp_genet,"_3 --remove ",study_dupl_ind," --make-bed --out ",study_data_oth,sep="")
 system(cmnd1,intern = F)
 system(cmnd2,intern = F)
 
@@ -252,6 +272,6 @@ write.table(reff,reff_freqs,row.names=F,col.names=T,quote=F,sep="\t")
 
 # cleanup
 cmnd7 = paste("rm ",temp_file_rix," ",temp_file_hap," ",temp_file_rndPhe," ",temp_file_gntpCnts,"* ",
-              study_data_dpl,"* ",study_data_oth,"*",sep="")
+              study_data_dpl,"* ",study_data_oth,"* ",temp_genet,"* ",sep="")
 system(cmnd7,intern = F)
 
