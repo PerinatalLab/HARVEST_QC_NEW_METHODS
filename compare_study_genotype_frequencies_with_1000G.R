@@ -69,14 +69,14 @@ cmnd02d = paste(plink," --bfile ",temp_genet,"_1dup --update-ids ",famids," --ma
 cmnd02o = paste(plink," --bfile ",temp_genet,"_1oth --update-ids ",famids," --make-bed --out ",temp_genet,"_2oth",sep="")
 cmnd03d = paste(plink," --bfile ",temp_genet,"_2dup --update-parents ",parent," --recode12 --out ",study_data_dpl,sep="")
 cmnd03o = paste(plink," --bfile ",temp_genet,"_2oth --update-parents ",parent," --make-bed --out ",study_data_oth,sep="") # this can stay binary
-system(cmnd00d,intern = F)
-system(cmnd00o,intern = F)
-system(cmnd01d,intern = F)
-system(cmnd01o,intern = F)
-system(cmnd02d,intern = F)
-system(cmnd02o,intern = F)
-system(cmnd03d,intern = F)
-system(cmnd03o,intern = F)
+system(cmnd00d,intern = F); system("wait",intern = F)
+system(cmnd00o,intern = F); system("wait",intern = F)
+system(cmnd01d,intern = F); system("wait",intern = F)
+system(cmnd01o,intern = F); system("wait",intern = F)
+system(cmnd02d,intern = F); system("wait",intern = F)
+system(cmnd02o,intern = F); system("wait",intern = F)
+system(cmnd03d,intern = F); system("wait",intern = F)
+system(cmnd03o,intern = F); system("wait",intern = F)
 
 
 #### create a genotype count table for every marker in DUPLICATED samples
@@ -155,7 +155,7 @@ write.table(rnd_phe_df, temp_file_rndPhe ,row.names=F,col.names=T,quote=F,sep="\
 cmnd3 = paste(plink,"--bfile",study_data_oth,"--no-pheno --pheno",temp_file_rndPhe,
               "--assoc qt-means --allow-no-sex --filter-founders --out", temp_file_gntpCnts,sep=" ")
                         # allow-no-sex is necessary, otherwise all phenotypes are ignored..
-system(cmnd3,intern = F)
+system(cmnd3,intern = F); system("wait",intern = F)
 
 # extract and reformat the genotype counts from PLINK output
 tmp0 = read.table(paste(temp_file_gntpCnts,".qassoc.means",sep=""),h=T)
@@ -177,8 +177,8 @@ map = read.table(study_data_dpl_map ,stringsAsFactors = F) #dim(map); head(map)
 # decompress needed reference files
 cmnd4 = paste("gzip -d ",reff_data_legend,".gz",sep="")
 cmnd5 = paste("gzip -d ",reff_data_haplot,".gz",sep="")
-system(cmnd4,intern = F)
-system(cmnd5,intern = F)
+system(cmnd4,intern = F); system("wait",intern = F)
+system(cmnd5,intern = F); system("wait",intern = F)
 
 
 # load 1000G marker list and info (only specific columns)
@@ -210,7 +210,7 @@ row_indexes = which(leg$id %in% m$id)
 write.table(row_indexes,temp_file_rix,row.names=F,col.names=F,quote=F,sep="\t")
 #cmnd6 = paste("awk 'NR==FNR{a[$0]=1;next}a[FNR]' ",temp_file_rix," ",reff_data_haplot," > ",temp_file_hap,sep="") #
 cmnd6 = paste("awk 'NR==FNR{a[$0]=1;next} FNR in a' ",temp_file_rix," ",reff_data_haplot," > ",temp_file_hap,sep="") # by Julius
-system(cmnd6,intern = F)
+system(cmnd6,intern = F); system("wait",intern = F)
 
 
 # load file describing populations and select only European individuals
@@ -277,5 +277,5 @@ write.table(reff,reff_freqs,row.names=F,col.names=T,quote=F,sep="\t")
 # cleanup
 cmnd7 = paste("rm ",temp_file_rix," ",temp_file_hap," ",temp_file_rndPhe," ",temp_file_gntpCnts,"* ",
               study_data_dpl,"* ",study_data_oth,"* ",temp_genet,"* ",sep="")
-system(cmnd7,intern = F)
+system(cmnd7,intern = F); system("wait",intern = F)
 
