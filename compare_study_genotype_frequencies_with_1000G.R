@@ -30,9 +30,9 @@ temp_file_hap = paste(working_dir,"tempFile_extracted_1kGhap.txt",sep="")
 temp_file_rndPhe =  paste(working_dir,"tempFile_randomPhenotype_nonDuplSmpls.txt",sep="")
 temp_file_gntpCnts = paste(working_dir,"tempFile_gntpCounts_nonDuplInds_onlyFounders",sep="")
 # result outputs
-reff_freqs =  paste(working_dir,"1kGreference_gntpFrequencies_chr",chr,".txt",sep="")
-study_dupl_freqs =  paste(working_dir,"studyDuplSamples_gntpFrequencies_chr",chr,".txt",sep="")
-study_other_freqs =  paste(working_dir,"studyNonDuplSamples_gntpFrequencies_chr",chr,".txt",sep="")
+reff_freqs              = paste(working_dir,study_data_root,"_1000Greference_gntpFrequencies_chr",chr,".txt",sep="")
+study_dupl_freqs        = paste(working_dir,study_data_root,"_studyDuplSamples_concordances_chr",chr,".txt",sep="")
+study_other_freqs       = paste(working_dir,study_data_root,"_studyNonDuplSamples_gntpFrequencies_chr",chr,".txt",sep="")
 
 # read-ins
 study_data_dpl_map = paste(working_dir,study_data_root,"_duplicates_chr",chr,".map",sep="")
