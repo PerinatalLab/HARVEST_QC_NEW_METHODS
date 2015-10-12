@@ -136,8 +136,10 @@ system(cmnd3,intern = F)
 # extract and reformat the genotype counts from PLINK output
 tmp0 = read.table(paste(temp_file_gntpCnts,".qassoc.means",sep=""),h=T)
 tmp1 = tmp0[which(tmp0$VALUE=="COUNTS"),] # only relevant rows
-othInd_gntpCnts = tmp1[,c("SNP","G11","G12","G22")]
-colnames(othInd_gntpCnts) = c("SNP","AA","AB","BB")
+tmp2 = tmp1[,c("SNP","G11","G12","G22")]
+colnames(tmp2) = c("SNP","AA","AB","BB")
+bim = read.table(paste(study_data_oth,".bim",sep=""),stringsAsFactors = F,h=F)
+othInd_gntpCnts = merge(tmp2,bim,by.x="SNP",by.y="V2",all.x=T)
 write.table(othInd_gntpCnts, study_other_freqs, row.names=F,col.names=T,quote=F,sep="\t")
 
 
