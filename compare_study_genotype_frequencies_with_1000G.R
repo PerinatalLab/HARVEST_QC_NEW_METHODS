@@ -179,7 +179,7 @@ system(cmnd5,intern = F); system("wait",intern = F)
 # load 1000G marker list and info (only specific columns)
 colcl_leg = rep("NULL",11); colcl_leg[c(1,2,5,9)]=NA  # in order to increase the speed
 leg = read.table(reff_data_legend,colClasses=colcl_leg,stringsAsFactors = F,h=T)
-leg = leg[grep("biallelic",leg$TYPE,ignore.case=T),]
+valid_indxs = grep("biallelic",leg$TYPE,ignore.case=T) # to be used later
 head(leg); dim(leg)
 
 
@@ -202,6 +202,7 @@ m = m[which(!duplicated(m$id)),]
 
 # reduce row-wise the very large haplotype file
 row_indexes = which(leg$id %in% m$id)
+row_indexes = row_indexes[which(row_indexes %in% valid_indxs)] # leave only those that are biallelic
 write.table(row_indexes,temp_file_rix,row.names=F,col.names=F,quote=F,sep="\t")
 #cmnd6 = paste("awk 'NR==FNR{a[$0]=1;next}a[FNR]' ",temp_file_rix," ",reff_data_haplot," > ",temp_file_hap,sep="") #
 cmnd6 = paste("awk 'NR==FNR{a[$0]=1;next} FNR in a' ",temp_file_rix," ",reff_data_haplot," > ",temp_file_hap,sep="") # by Julius
@@ -236,7 +237,7 @@ cixs2 = 2+(seq(n_inds)-1)*2
 s1 = hap[,cixs1]
 s2 = hap[,cixs2]
 
-df = s1+s2+1
+df = s1+s2+1 # 1 = for compatability reasons (gntps = 1,2,3)
 
 KGgntpFrq = matrix(NA,nr=nrow(df),nc=3)
 for ( i in 1:nrow(df)) {
