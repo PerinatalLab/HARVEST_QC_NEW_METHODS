@@ -127,7 +127,8 @@ write.table(rnd_phe_df, temp_file_rndPhe ,row.names=F,col.names=T,quote=F,sep="\
 
 # run plink
 cmnd3 = paste(plink,"--bfile",study_data_oth,"--pheno",temp_file_rndPhe,
-              "--assoc qt-means --filter-founders --out", temp_file_gntpCnts,sep=" ")
+              "--assoc qt-means --allow-no-sex --filter-founders --out", temp_file_gntpCnts,sep=" ")
+                        # allow-no-sex is necessary, otherwise all phenotypes are ignored..
 system(cmnd3,intern = F)
 
 # extract and reformat the genotype counts from PLINK output
