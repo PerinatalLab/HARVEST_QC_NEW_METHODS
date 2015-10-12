@@ -121,8 +121,9 @@ write.table(rez, study_dupl_freqs, row.names=F, col.names=T, quote=F, sep="\t")
 # generate a random phenotype (necessary to run plink command)
 fam_oth = read.table(paste(study_data_oth,".fam",sep=""),h=F,stringsAsFactors = F)
 rnd_phe = sample(2,nrow(fam_oth),replace=T)
-rnd_phe_df = data.frame(fam_oth[,c(1,2)],rPhe=rnd_phe,stringsAsFactors = F)
-write.table(rnd_phe_df, temp_file_rndPhe ,row.names=F,col.names=F,quote=F,sep="\t")
+rnd_phe_df = data.frame(fam_oth[,c(1,2)],rPHE=rnd_phe,stringsAsFactors = F)
+colnames(rnd_phe_df)=c("FID","IID","rPHE")
+write.table(rnd_phe_df, temp_file_rndPhe ,row.names=F,col.names=T,quote=F,sep="\t")
 
 # run plink
 cmnd3 = paste(plink,"--bfile",study_data_oth,"--pheno",temp_file_rndPhe,
