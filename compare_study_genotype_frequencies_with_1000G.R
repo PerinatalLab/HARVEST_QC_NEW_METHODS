@@ -120,13 +120,13 @@ write.table(rez, study_dupl_freqs, row.names=F, col.names=T, quote=F, sep="\t")
 
 # generate a random phenotype (necessary to run plink command)
 fam_oth = read.table(paste(study_data_oth,".fam",sep=""),h=F,stringsAsFactors = F)
-rnd_phe = sample(c(0,1),nrow(fam_oth),replace=T)
+rnd_phe = rnorm(nrow(fam_oth))
 rnd_phe_df = data.frame(fam_oth[,c(1,2)],rPHE=rnd_phe,stringsAsFactors = F)
 colnames(rnd_phe_df)=c("FID","IID","rPHE")
 write.table(rnd_phe_df, temp_file_rndPhe ,row.names=F,col.names=T,quote=F,sep="\t")
 
 # run plink
-cmnd3 = paste(plink,"--bfile",study_data_oth,"--pheno",temp_file_rndPhe,
+cmnd3 = paste(plink,"--bfile",study_data_oth,"--no-pheno --pheno",temp_file_rndPhe,
               "--assoc qt-means --allow-no-sex --filter-founders --out", temp_file_gntpCnts,sep=" ")
                         # allow-no-sex is necessary, otherwise all phenotypes are ignored..
 system(cmnd3,intern = F)
