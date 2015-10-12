@@ -173,7 +173,7 @@ sum(duplicated(m$V2)) #  are ther eany duplicated SNPs| names after merging ?
 sum(duplicated(m$id)) #  are ther eany duplicated SNPs| names after merging ? 
 # cleanup duplicates
 m = m[which(!duplicated(m$id)),]
-dim(m)
+#dim(m)
 
 # reduce row-wise the very large haplotype file
 row_indexes = which(leg$id %in% m$id)
@@ -198,8 +198,8 @@ colcl_hap[cixs] = "integer"
 # read haplotypes
 hap = read.table(temp_file_hap,colClasses=colcl_hap,stringsAsFactors = F,h=F)
 leg = leg[row_indexes,]
-dim(hap); hap[1:10,1:10]
-dim(leg); head(leg)
+#dim(hap); hap[1:10,1:10]
+#dim(leg); head(leg)
 
 ##############
 
@@ -219,10 +219,10 @@ for ( i in 1:nrow(df)) {
         KGgntpFrq[i,] = tmp ; rm(tmp)
 }
 colnames(KGgntpFrq)=c("AA","AB","BB")
-head(KGgntpFrq)
+#head(KGgntpFrq)
 
 
-# enforce that minor 
+# enforce that minor woud be on the left
 if (sum(KGgntpFrq[,1] > KGgntpFrq[,3])==nrow(KGgntpFrq)) {
 # inversion of genotypes counts (to make it comparable with PLINK's output)
 # rix_inv = which(leg$EUR<0.5) # rows that need genotype inversion (only for March 2012 version)
@@ -239,6 +239,14 @@ print(paste("AA<AB ",sum(KGgntpFrq[,1]<KGgntpFrq[,2]),sep=""))
 
 # combine marker info with genotype counts
 reff  = data.frame(leg,KGgntpFrq)
-head(reff); dim(reff)
+#head(reff); dim(reff)
 
 write.table(reff,reff_freqs,row.names=F,col.names=T,quote=F,sep="\t")
+
+
+
+
+# cleanup
+cmnd7 = paste("rm",temp_file_rix,temp_file_hap, temp_file_rndPhe, temp_file_gntpCnts,sep=" ")
+system(cmnd7,intern = F)
+
