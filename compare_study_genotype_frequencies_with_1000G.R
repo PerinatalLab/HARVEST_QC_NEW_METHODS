@@ -7,28 +7,36 @@
 
 chr = 22
 
-# define the locations and names
+### define the locations and names
 plink = "/home/jonasbac/results/moba24-reference-script_5010jb/plink"
 
-# inputs
+### inputs
 study_data_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/"
+# the study file which is analysed
 study_data_root = "merge-qc"
 study_data_fil = paste(study_data_dir,study_data_root,sep="")
+# a list of all individuals in duplicated samples (two-column format: FID, IID)
 study_dupl_ind = paste(study_data_dir,"duplicated_individuals.txt",sep="")
+# what are the duplicate pairs (which individual belongs to which individual)
+study_dupl_match = "/media/local-disk/common/gsexport/moba_24v10_n12874inc135regdup9dualdup/SentrixIDs_moba24_135regdup.txt"
 
-# outputs
+### outputs
 working_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/WORK/"
 study_data_dpl = paste(working_dir,study_data_root,"_duplicates_chr",chr,sep="")
 study_data_oth = paste(working_dir,study_data_root,"_all-others_chr",chr,sep="")
 temp_file_rix = paste(working_dir,"tempFile_whichRowsToKeep.txt",sep="")
-temp_file_hap = paste(working_dir,"tmpFile_extracted_1kGhap.txt",sep="")
+temp_file_hap = paste(working_dir,"tempFile_extracted_1kGhap.txt",sep="")
 reff_freqs =  paste(working_dir,"1kGreference_gntpFrequencies_chr",chr,".txt",sep="")
-        
+study_dupl_freqs =  paste(working_dir,"studyDuplSamples_gntpFrequencies_chr",chr,".txt",sep="")
+temp_file_rndPhe =  paste(working_dir,"tempFile_randomPhenotype_nonDuplSmpls.txt",sep="")
+temp_file_gntpCnts = paste(working_dir,"tempFile_gntpCounts_nonDuplInds_onlyFounders",sep="")
+study_other_freqs =  paste(working_dir,"studyNonDuplSamples_gntpFrequencies_chr",chr,".txt",sep="")
+
 # read-ins
 study_data_dpl_map = paste(working_dir,study_data_root,"_duplicates_chr",chr,".map",sep="")
 study_data_dpl_ped = paste(working_dir,study_data_root,"_duplicates_chr",chr,".ped",sep="")
-study_data_oth_map = paste(working_dir,study_data_root,"_all-others_chr",chr,".map",sep="")
-study_data_oth_ped = paste(working_dir,study_data_root,"_all-others_chr",chr,".ped",sep="")
+#study_data_oth_map = paste(working_dir,study_data_root,"_all-others_chr",chr,".map",sep="")
+#study_data_oth_ped = paste(working_dir,study_data_root,"_all-others_chr",chr,".ped",sep="")
 
 # 1000 genomes data location and file names
 reff_data_dir = "/home/jonasbac/1000G/1000GP_Phase3/"
@@ -39,12 +47,97 @@ reff_data_haplot = paste(reff_data_dir,"1000GP_Phase3_chr",chr,".hap",sep="") # 
 
 ########### START
 
-# extract relevant study data
+### extract relevant study data to a non-binary format
 cmnd1 = paste(plink, "--bfile",study_data_fil,"--chr",chr,"--keep",study_dupl_ind,"--recode12 --out",study_data_dpl,sep=" ")
-cmnd2 = paste(plink, "--bfile",study_data_fil,"--chr",chr,"--remove",study_dupl_ind,"--recode12 --out",study_data_oth,sep=" ")
+cmnd2 = paste(plink, "--bfile",study_data_fil,"--chr",chr,"--remove",study_dupl_ind,"--make-bed --out",study_data_oth,sep=" ")
 system(cmnd1,intern = F)
 system(cmnd2,intern = F)
 
+#### create a genotype count table for every marker in DUPLICATED samples
+
+# read-in marker data
+map = read.table(study_data_dpl_map , stringsAsFactors = F)
+# read-in the family and genotype data
+tmp = read.table(study_data_dpl_ped , stringsAsFactors = F)
+# save family information separately
+fam = tmp[,1:6]
+# convert ped file format into genotype matrix
+n_snps = (ncol(tmp)-6)/2 # is also  = nrow(map)
+# create a matrix of genotype values coded as 1,2,3 (one cell per individual*SNP)
+mtr = matrix(NA,nr=nrow(tmp),nc=n_snps) 
+for (snpix in 1:n_snps) {
+        a1 = tmp[,6 + 1 + (snpix-1)*2 ]  # allele A
+        a2 = tmp[,6 + 2 + (snpix-1)*2 ]  # allele B
+        gntp = a1*a2 # these are not doses, just number-converted allele names!
+        gntp[which(gntp==4)]=3
+        gntp[is.na(gntp)]=NA
+        mtr[,snpix] = gntp
+        rm(a1,a2,gntp)
+}
+#dim(mtr); mtr[1:10,1:10]
+
+# reconcile the ped file 
+ped = data.frame(fam,mtr,stringsAsFactors = F)
+#dim(ped); ped[1:10,1:10]
+
+# read the duplicate-match info
+tmp = read.table(study_dupl_match,stringsAsFactors = F)
+tmp1 = data.frame(ID = tmp$V1,sq=seq(nrow(tmp)),stringsAsFactors = F)
+tmp2 = data.frame(ID = tmp$V2,sq=seq(nrow(tmp)),stringsAsFactors = F)
+dup = rbind(tmp1,tmp2)  # information on what who is in pair with whom is still here
+#dim(dup); head(dup)
+
+m0 = merge(dup,ped,by.x="ID",by.y="V1",all=T)
+#dim(m0); m0[1:10,1:10]
+m1 = m0[which(m0$ID %in% tmp$V1),] # genetic info for the "A" individuals from pairs
+m2 = m0[which(m0$ID %in% tmp$V2),] # genetic info for the "B" individuals from pairs
+m1 = m1[order(m1$sq),] # preserve the original matching order (for comparability)
+m2 = m2[order(m2$sq),]
+m1 = m1[,-c(1:7)] # note that m1 has one fam column more than a pure fam
+m2 = m2[,-c(1:7)]
+
+# extract the genotype counts
+rez = matrix(NA,nr=n_snps,nc=9)
+ps_con = ps_all = NULL
+for (j in 1:ncol(m1)) {
+        gr1 = factor(m1[,j],levels = c(1,2,3)) # missing genotypes not included
+        gr2 = factor(m2[,j],levels = c(1,2,3))
+        tbl = table(gr1,gr2)
+        rez[j,] = c( as.numeric(tbl)[c(1,5,9)], # diagonal (3 types of matches)
+                     sum(as.numeric(tbl)[c(2,4)]), # heteroz = homozAA  (4col)
+                     sum(as.numeric(tbl)[c(6,8)]), # heteroz = homozBB  (5col)
+                     sum(as.numeric(tbl)[c(3,7)]), # homozAA == homozBB (6col)
+                     sum(is.na(gr1)),sum(is.na(gr2)), # missing at one individual from pair
+                     sum( (is.na(gr1))&(is.na(gr2)))) # missing match  (9col)
+        rm(gr1,gr2,tbl)
+}
+colnames(rez) = c("AAok","ABok","BBok","err_homHET","err_HOMhet","err_homHOM","mis1","mis2","mis12")
+write.table(rez, study_dupl_freqs, row.names=F, col.names=T, quote=F, sep="\t")
+
+
+#### create a genotype count table for every marker in NONDUPLICATED (remaining) samples
+# only founders are used
+
+# generate a random phenotype (necessary to run plink command)
+fam_oth = read.table(paste(study_data_oth,".fam",sep=""),h=F,stringsAsFactors = F)
+rnd_phe = sample(2,nrow(fam_oth),replace=T)
+rnd_phe_df = data.frame(fam_oth[,c(1,2)],rPhe=rnd_phe,stringsAsFactors = F)
+write.table(rnd_phe_df, temp_file_rndPhe ,row.names=F,col.names=F,quote=F,sep="\t")
+
+# run plink
+cmnd3 = paste(plink,"--bfile",study_data_oth,"--pheno",temp_file_rndPhe,
+              "--assoc --qt-means --filter-founders --out", temp_file_gntpCnts,sep=" ")
+system(cmnd3,intern = F)
+
+# extract and reformat the genotype counts from PLINK output
+tmp0 = read.table(paste(temp_file_gntpCnts,".qassoc.means",sep=""),h=T)
+tmp1 = tmp0[which(tmp0$VALUE=="COUNTS"),] # only relevant rows
+othInd_gntpCnts = tmp1[,c("SNP","G11","G12","G22")]
+colnames(othInd_gntpCnts) = c("SNP","AA","AB","BB")
+write.table(othInd_gntpCnts, study_other_freqs, row.names=F,col.names=T,quote=F,sep="\t")
+
+
+############  continue extracting reference data (1000 Genomes)
 
 
 # load study marker list for genotyping study (one particular chromosome)
@@ -52,10 +145,10 @@ map = read.table(study_data_dpl_map ,stringsAsFactors = F) #dim(map); head(map)
 
 
 # decompress needed reference files
-cmnd3 = paste("gzip -d ",reff_data_legend,".gz",sep="")
-cmnd4 = paste("gzip -d ",reff_data_haplot,".gz",sep="")
-system(cmnd3,intern = F)
+cmnd4 = paste("gzip -d ",reff_data_legend,".gz",sep="")
+cmnd5 = paste("gzip -d ",reff_data_haplot,".gz",sep="")
 system(cmnd4,intern = F)
+system(cmnd5,intern = F)
 
 
 # load 1000G marker list and info (only specific columns)
@@ -85,9 +178,9 @@ dim(m)
 # reduce row-wise the very large haplotype file
 row_indexes = which(leg$id %in% m$id)
 write.table(row_indexes,temp_file_rix,row.names=F,col.names=F,quote=F,sep="\t")
-#cmnd5 = paste("awk 'NR==FNR{a[$0]=1;next}a[FNR]' ",temp_file_rix," ",reff_data_haplot," > ",temp_file_hap,sep="") #
-cmnd5 = paste("awk 'NR==FNR{a[$0]=1;next} FNR in a' ",temp_file_rix," ",reff_data_haplot," > ",temp_file_hap,sep="") # by Julius
-system(cmnd5,intern = F)
+#cmnd6 = paste("awk 'NR==FNR{a[$0]=1;next}a[FNR]' ",temp_file_rix," ",reff_data_haplot," > ",temp_file_hap,sep="") #
+cmnd6 = paste("awk 'NR==FNR{a[$0]=1;next} FNR in a' ",temp_file_rix," ",reff_data_haplot," > ",temp_file_hap,sep="") # by Julius
+system(cmnd6,intern = F)
 
 
 # load file describing populations and select only European individuals
