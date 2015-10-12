@@ -55,20 +55,15 @@ reff_data_haplot = paste(reff_data_dir,"1000GP_Phase3_chr",chr,".hap",sep="") # 
 
 ########### START
 
-# read the update-information  
-famids = read.table(recode_famids,h=F,stringsAsFactors = F); head(famids)
-gender = read.table(recode_gender,h=F,stringsAsFactors = F); head(gender)
-parent = read.table(recode_parent,h=F,stringsAsFactors = F); head(parent)
-
 # update genetic file and extract relevant study data to a non-binary format
 cmnd00d = paste(plink," --bfile ",study_data_fil," --keep "  ,study_dupl_ind," --chr ",chr," --make-bed --out ",temp_genet,"_0dup",sep="")
 cmnd00o = paste(plink," --bfile ",study_data_fil," --remove ",study_dupl_ind," --chr ",chr," --make-bed --out ",temp_genet,"_0oth",sep="")
-cmnd01d = paste(plink," --bfile ",temp_genet,"_0dup --update-sex ",gender," --make-bed --out ",temp_genet,"_1dup",sep="")
-cmnd01o = paste(plink," --bfile ",temp_genet,"_0oth --update-sex ",gender," --make-bed --out ",temp_genet,"_1oth",sep="")
-cmnd02d = paste(plink," --bfile ",temp_genet,"_1dup --update-ids ",famids," --make-bed --out ",temp_genet,"_2dup",sep="")
-cmnd02o = paste(plink," --bfile ",temp_genet,"_1oth --update-ids ",famids," --make-bed --out ",temp_genet,"_2oth",sep="")
-cmnd03d = paste(plink," --bfile ",temp_genet,"_2dup --update-parents ",parent," --recode12 --out ",study_data_dpl,sep="")
-cmnd03o = paste(plink," --bfile ",temp_genet,"_2oth --update-parents ",parent," --make-bed --out ",study_data_oth,sep="") # this can stay binary
+cmnd01d = paste(plink," --bfile ",temp_genet,"_0dup --update-sex ",recode_gender," --make-bed --out ",temp_genet,"_1dup",sep="")
+cmnd01o = paste(plink," --bfile ",temp_genet,"_0oth --update-sex ",recode_gender," --make-bed --out ",temp_genet,"_1oth",sep="")
+cmnd02d = paste(plink," --bfile ",temp_genet,"_1dup --update-ids ",recode_famids," --make-bed --out ",temp_genet,"_2dup",sep="")
+cmnd02o = paste(plink," --bfile ",temp_genet,"_1oth --update-ids ",recode_famids," --make-bed --out ",temp_genet,"_2oth",sep="")
+cmnd03d = paste(plink," --bfile ",temp_genet,"_2dup --update-parents ",recode_parent," --recode12 --out ",study_data_dpl,sep="")
+cmnd03o = paste(plink," --bfile ",temp_genet,"_2oth --update-parents ",recode_parent," --make-bed --out ",study_data_oth,sep="") # this can stay binary
 system(cmnd00d,intern = F); system("wait")
 system(cmnd00o,intern = F); system("wait")
 system(cmnd01d,intern = F); system("wait")
