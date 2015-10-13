@@ -39,7 +39,7 @@ temp_genet = paste(working_dir,"tempFile_updatingGeneticFile",sep="")
 reff_freqs              = paste(working_dir,study_data_root,"_1000Greference_gntpFrequencies_chr",chr,".txt",sep="")
 study_dupl_freqs        = paste(working_dir,study_data_root,"_studyDuplSamples_concordances_chr",chr,".txt",sep="")
 study_other_freqs       = paste(working_dir,study_data_root,"_studyNonDuplSamples_gntpFrequencies_chr",chr,".txt",sep="")
-study_allele_frqs       = paste(working_dir,study_data_root,"_studyNonDuplSamples_alleleFrequencies_chr",chr,".txt",sep="")
+study_allele_frqs       = paste(working_dir,study_data_root,"_studyNonDuplSamples_alleleFrequencies_chr",chr,sep="")
 
 # read-ins
 study_data_dpl_map = paste(working_dir,study_data_root,"_duplicates_chr",chr,".map",sep="")
@@ -63,7 +63,7 @@ cmnd01d = paste(plink," --bfile ",temp_genet,"_0dup --update-sex ",recode_gender
 cmnd01o = paste(plink," --bfile ",temp_genet,"_0oth --update-sex ",recode_gender," --make-bed --out ",temp_genet,"_1oth",sep="")
 cmnd02d = paste(plink," --bfile ",temp_genet,"_1dup --update-ids ",recode_famids," --make-bed --out ",temp_genet,"_2dup",sep="")
 cmnd02o = paste(plink," --bfile ",temp_genet,"_1oth --update-ids ",recode_famids," --make-bed --out ",temp_genet,"_2oth",sep="")
-cmnd03d = paste(plink," --bfile ",temp_genet,"_2dup --update-parents ",recode_parent," --recode12 --out ",temp_genet,"_3dup",sep="")
+cmnd03d = paste(plink," --bfile ",temp_genet,"_2dup --update-parents ",recode_parent," --make-bed --out ",temp_genet,"_3dup",sep="")
 cmnd04d = paste(plink," --bfile ",temp_genet,"_3dup --filter-founders --recode12 --out ",study_data_dpl,sep="")
 cmnd03o = paste(plink," --bfile ",temp_genet,"_2oth --update-parents ",recode_parent," --make-bed --out ",study_data_oth,sep="") # this can stay binary
 system(cmnd00d,intern = F); system("wait")
