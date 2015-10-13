@@ -283,3 +283,11 @@ cmnd7 = paste("rm ",temp_file_rix," ",temp_file_hap," ",temp_file_rndPhe," ",tem
               study_data_dpl,"* ",study_data_oth,"* ",temp_genet,"* ",sep="")
 system(cmnd7,intern = F); system("wait",intern = F)
 
+
+# compress 1000G to its original state
+cmnd8 = paste("gzip ",reff_data_legend,sep="")
+cmnd9 = paste("gzip ",reff_data_haplot,sep="")
+system(cmnd8,intern = F); system("wait",intern = F)
+system(cmnd9,intern = F); system("wait",intern = F)
+
+
