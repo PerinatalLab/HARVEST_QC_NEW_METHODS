@@ -6,7 +6,8 @@
 #  by Jonas Bacelis. 2015 Oct 11-12
 
 # select the chromosome to work on
-chr = 1
+#chr = 1
+for (chr in 1:22) {
 
 ### define the locations and name of the PLINK program
 plink = "/home/jonasbac/results/moba24-reference-script_5010jb/plink"
@@ -289,5 +290,7 @@ cmnd8 = paste("gzip ",reff_data_legend,sep="")
 cmnd9 = paste("gzip ",reff_data_haplot,sep="")
 system(cmnd8,intern = F); system("wait",intern = F)
 system(cmnd9,intern = F); system("wait",intern = F)
+
+} # end of cycling through chromosomes
 
 
