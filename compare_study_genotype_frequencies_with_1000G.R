@@ -93,7 +93,7 @@ tmp = read.table(study_data_dpl_ped , stringsAsFactors = F)
 fam = tmp[,1:6]
 # convert ped file format into genotype matrix
 n_snps = (ncol(tmp)-6)/2 # is also  = nrow(map)
-# create a matrix of genotype values coded as 1,2,3 (one cell per individual*SNP)
+# create a matrix of genotype values coded as 1,2,3 (one cell per individual*SNP). one row = one individual
 mtr = matrix(NA,nr=nrow(tmp),nc=n_snps) 
 for (snpix in 1:n_snps) {
         a1 = tmp[,6 + 1 + (snpix-1)*2 ]  # allele A
@@ -110,20 +110,20 @@ for (snpix in 1:n_snps) {
 ped = data.frame(fam,mtr,stringsAsFactors = F)
 #dim(ped); ped[1:10,1:10]
 
-# read the duplicate-match info
+# read the duplicate-match info. two columns
 tmp = read.table(study_dupl_match,stringsAsFactors = F)
 tmp1 = data.frame(ID = tmp$V1,sq=seq(nrow(tmp)),stringsAsFactors = F)
 tmp2 = data.frame(ID = tmp$V2,sq=seq(nrow(tmp)),stringsAsFactors = F)
 dup = rbind(tmp1,tmp2)  # information on what who is in pair with whom is still here
 #dim(dup); head(dup)
 
-m0 = merge(dup,ped,by.x="ID",by.y="V1",all=T)
+m0 = merge(dup,ped,by.x="ID",by.y="V1",all=T) # arguable = FALSE
 #dim(m0); m0[1:10,1:10]
 m1 = m0[which(m0$ID %in% tmp$V1),] # genetic info for the "A" individuals from pairs
 m2 = m0[which(m0$ID %in% tmp$V2),] # genetic info for the "B" individuals from pairs
 m1 = m1[order(m1$sq),] # preserve the original matching order (for comparability)
 m2 = m2[order(m2$sq),]
-m1 = m1[,-c(1:7)] # note that m1 has one fam column more than a pure fam
+m1 = m1[,-c(1:7)] # note that m1 has one fam column more than a pure fam (due to sq column)
 m2 = m2[,-c(1:7)]
 
 # extract the genotype counts
@@ -141,6 +141,7 @@ for (j in 1:ncol(m1)) {
         rm(gr1,gr2,tbl)
 }
 colnames(rez) = c("AAok","ABok","BBok","err_homHET","err_HOMhet","err_homHOM","mis1","mis2","mis12")
+rez = data.frame(map,rez,stringsAsFactors = F)
 write.table(rez, study_dupl_freqs, row.names=F, col.names=T, quote=F, sep="\t")
 
 
