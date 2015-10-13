@@ -61,20 +61,23 @@ cmnd00d = paste(plink," --bfile ",study_data_fil," --keep "  ,study_dupl_ind," -
 cmnd00o = paste(plink," --bfile ",study_data_fil," --remove ",study_dupl_ind," --chr ",chr," --make-bed --out ",temp_genet,"_0oth",sep="")
 cmnd01d = paste(plink," --bfile ",temp_genet,"_0dup --update-sex ",recode_gender," --make-bed --out ",temp_genet,"_1dup",sep="")
 cmnd01o = paste(plink," --bfile ",temp_genet,"_0oth --update-sex ",recode_gender," --make-bed --out ",temp_genet,"_1oth",sep="")
-cmnd02d = paste(plink," --bfile ",temp_genet,"_1dup --update-ids ",recode_famids," --make-bed --out ",temp_genet,"_2dup",sep="")
+#cmnd02d = paste(plink," --bfile ",temp_genet,"_1dup --update-ids ",recode_famids," --make-bed --out ",temp_genet,"_2dup",sep="")
 cmnd02o = paste(plink," --bfile ",temp_genet,"_1oth --update-ids ",recode_famids," --make-bed --out ",temp_genet,"_2oth",sep="")
-cmnd03d = paste(plink," --bfile ",temp_genet,"_2dup --update-parents ",recode_parent," --make-bed --out ",temp_genet,"_3dup",sep="")
-cmnd04d = paste(plink," --bfile ",temp_genet,"_3dup --filter-founders --recode12 --out ",study_data_dpl,sep="")
+#cmnd03d = paste(plink," --bfile ",temp_genet,"_2dup --update-parents ",recode_parent," --make-bed --out ",temp_genet,"_3dup",sep="")
+#cmnd04d = paste(plink," --bfile ",temp_genet,"_3dup --filter-founders --recode12 --out ",study_data_dpl,sep="")
+cmnd03ddd = paste(plink," --bfile ",temp_genet,"_1dup --recode12 --out ",study_data_dpl,sep="")
+
 cmnd03o = paste(plink," --bfile ",temp_genet,"_2oth --update-parents ",recode_parent," --make-bed --out ",study_data_oth,sep="") # this can stay binary
 system(cmnd00d,intern = F); system("wait")
 system(cmnd00o,intern = F); system("wait")
 system(cmnd01d,intern = F); system("wait")
 system(cmnd01o,intern = F); system("wait")
-system(cmnd02d,intern = F); system("wait",intern = F)
+#system(cmnd02d,intern = F); system("wait",intern = F)
 system(cmnd02o,intern = F); system("wait",intern = F)
-system(cmnd03d,intern = F); system("wait",intern = F)
-system(cmnd04d,intern = F); system("wait",intern = F)
+#system(cmnd03d,intern = F); system("wait",intern = F)
+#system(cmnd04d,intern = F); system("wait",intern = F)
 system(cmnd03o,intern = F); system("wait",intern = F)
+system(cmnd03ddd,intern = F); system("wait",intern = F)
 
 # estimate summary statistic
 cmnd1 = paste(plink," --bfile ",study_data_oth," --filter-founders --freq --out ",study_allele_frqs,sep="")
@@ -125,7 +128,6 @@ m2 = m2[,-c(1:7)]
 
 # extract the genotype counts
 rez = matrix(NA,nr=n_snps,nc=9)
-ps_con = ps_all = NULL
 for (j in 1:ncol(m1)) {
         gr1 = factor(m1[,j],levels = c(1,2,3)) # missing genotypes not included
         gr2 = factor(m2[,j],levels = c(1,2,3))
