@@ -54,7 +54,6 @@ bim = read.table(paste(study_data_fil,".bim",sep=""),stringsAsFactors = F,h=F)
 ALLInd_gntpCnts = merge(tmp2,bim,by.x="SNP",by.y="V2",all.x=T)
 write.table(ALLInd_gntpCnts, study_ALL_freqs, row.names=F,col.names=T,quote=F,sep="\t")
 
-stop()
 
 # select the chromosome to work on
 #chr = 1
