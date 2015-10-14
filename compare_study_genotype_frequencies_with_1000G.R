@@ -32,7 +32,7 @@ recode_parent = "/media/local-disk/common/gsexport/recode-parents-total-moba.fam
 temp_file_allPhe =  paste(working_dir,"tempFile_randomPhenotype_ALLsamples.txt",sep="")
 temp_file_gntpCntsALL = paste(working_dir,"tempFile_gntpCounts_absolutelyALLindividuals",sep="")
 # output file
-study_ALL_freqs  = paste(working_dir,study_data_root,"_studyALLsamples_gntpFrequencies_chr",chr,".txt",sep="")
+study_ALL_freqs  = paste(working_dir,study_data_root,"_studyALLsamples_gntpFrequencies.txt",sep="")
 
 # generate a random phenotype (necessary to run plink command)
 fam_all = read.table(paste(study_data_fil,".fam",sep=""),h=F,stringsAsFactors = F)
