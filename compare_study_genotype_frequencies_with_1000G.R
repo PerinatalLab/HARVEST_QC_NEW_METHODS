@@ -3,14 +3,14 @@
 # this script is designed for HARVEST genotyping QC
 # purpose: compare genotype frequencies in a study data with 
 # European genotype frequencies from 1000 Genomes Project
-#  by Jonas Bacelis. 2015 Oct 11-12
+#  by Jonas Bacelis. 2015 Oct 11-14
 
-# select the chromosome to work on
-#chr = 1
-for (chr in 1:22) {
 
 ### define the locations and name of the PLINK program
 plink = "/home/jonasbac/results/moba24-reference-script_5010jb/plink"
+
+### outputs
+working_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/WORK/"
 
 ### inputs
 study_data_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/"
@@ -26,16 +26,49 @@ recode_famids = "/media/local-disk/common/gsexport/recode-famid-total-moba.fam"
 recode_gender = "/media/local-disk/common/gsexport/recode-sex-total-moba.fam"
 recode_parent = "/media/local-disk/common/gsexport/recode-parents-total-moba.fam"
 
-### outputs
-working_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/WORK/"
-# temporary outputs
-study_data_dpl = paste(working_dir,study_data_root,"_duplicates_chr",chr,sep="")
-study_data_oth = paste(working_dir,study_data_root,"_all-others_chr",chr,sep="")
-temp_file_rix = paste(working_dir,"tempFile_whichRowsToKeep.txt",sep="")
-temp_file_hap = paste(working_dir,"tempFile_extracted_1kGhap.txt",sep="")
-temp_file_rndPhe =  paste(working_dir,"tempFile_randomPhenotype_nonDuplSmpls.txt",sep="")
-temp_file_gntpCnts = paste(working_dir,"tempFile_gntpCounts_nonDuplInds_onlyFounders",sep="")
-temp_genet = paste(working_dir,"tempFile_updatingGeneticFile",sep="")
+###### generate genotypic counts for absolutely all study individuals:
+
+# temporary files
+temp_file_allPhe =  paste(working_dir,"tempFile_randomPhenotype_ALLsamples.txt",sep="")
+temp_file_gntpCntsALL = paste(working_dir,"tempFile_gntpCounts_absolutelyALLindividuals",sep="")
+# output file
+study_ALL_freqs  = paste(working_dir,study_data_root,"_studyALLsamples_gntpFrequencies_chr",chr,".txt",sep="")
+
+# generate a random phenotype (necessary to run plink command)
+fam_all = read.table(paste(study_data_fil,".fam",sep=""),h=F,stringsAsFactors = F)
+all_phe = rnorm(nrow(fam_all))
+all_phe_df = data.frame(fam_all[,c(1,2)],rPHE=all_phe,stringsAsFactors = F)
+colnames(all_phe_df)=c("FID","IID","rPHE")
+write.table(all_phe_df, temp_file_allPhe ,row.names=F,col.names=T,quote=F,sep="\t")
+# run plink
+cmnd0 = paste(plink,"--bfile",study_data_fil,"--no-pheno --pheno",temp_file_allPhe,
+              "--assoc qt-means --allow-no-sex --out", temp_file_gntpCntsALL,sep=" ")
+# allow-no-sex is necessary, otherwise all phenotypes are ignored..
+system(cmnd0,intern = F); system("wait",intern = F)
+# extract and reformat the genotype counts from PLINK output
+tmp0 = read.table(paste(temp_file_gntpCntsALL,".qassoc.means",sep=""),h=T)
+tmp1 = tmp0[which(tmp0$VALUE=="COUNTS"),] # only relevant rows
+tmp2 = tmp1[,c("SNP","G11","G12","G22")]
+colnames(tmp2) = c("SNP","AA","AB","BB")
+bim = read.table(paste(study_data_fil,".bim",sep=""),stringsAsFactors = F,h=F)
+ALLInd_gntpCnts = merge(tmp2,bim,by.x="SNP",by.y="V2",all.x=T)
+write.table(ALLInd_gntpCnts, study_ALL_freqs, row.names=F,col.names=T,quote=F,sep="\t")
+
+stop()
+
+# select the chromosome to work on
+#chr = 1
+for (chr in 1:22) {
+
+        # temporary outputs
+        study_data_dpl = paste(working_dir,study_data_root,"_duplicates_chr",chr,sep="")
+        study_data_oth = paste(working_dir,study_data_root,"_all-others_chr",chr,sep="")
+        temp_file_rix = paste(working_dir,"tempFile_whichRowsToKeep.txt",sep="")
+        temp_file_hap = paste(working_dir,"tempFile_extracted_1kGhap.txt",sep="")
+        temp_file_rndPhe =  paste(working_dir,"tempFile_randomPhenotype_nonDuplSmpls.txt",sep="")
+        temp_file_gntpCnts = paste(working_dir,"tempFile_gntpCounts_nonDuplInds_onlyFounders",sep="")
+        temp_genet = paste(working_dir,"tempFile_updatingGeneticFile",sep="")
+        
 # result outputs
 reff_freqs              = paste(working_dir,study_data_root,"_1000Greference_gntpFrequencies_chr",chr,".txt",sep="")
 study_dupl_freqs        = paste(working_dir,study_data_root,"_studyDuplSamples_concordances_chr",chr,".txt",sep="")
@@ -281,8 +314,10 @@ write.table(reff,reff_freqs,row.names=F,col.names=T,quote=F,sep="\t")
 
 # cleanup
 cmnd7 = paste("rm ",temp_file_rix," ",temp_file_hap," ",temp_file_rndPhe," ",temp_file_gntpCnts,"* ",
-              study_data_dpl,"* ",study_data_oth,"* ",temp_genet,"* ",sep="")
+              study_data_dpl,"* ",study_data_oth,"* ",temp_genet,"* ",
+              temp_file_allPhe,"* ",temp_file_gntpCntsALL,"* ","*log *nosex",sep="")
 system(cmnd7,intern = F); system("wait",intern = F)
+
 
 
 # compress 1000G to its original state
