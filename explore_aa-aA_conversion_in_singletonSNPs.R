@@ -11,9 +11,9 @@
 plink = "/home/jonasbac/results/moba24-reference-script_5010jb/plink"
 
 # the study data directory
-study_data_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/"
+study_data_dir = "/home/jonasbac/results/moba12-reference-script_5014jb/data/"
 # results directory
-working_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/zcallBias_AAAB/"
+working_dir = "/home/jonasbac/results/moba12-reference-script_5014jb/data/zcallBias_AAAB/"
 
 # the study data file which is analysed
 datasets = c("gencall-raw", "gencall-qc", "zcall-raw", "zcall-qc", "merge-raw","merge-qc")
