@@ -36,7 +36,7 @@ for (study_data_root in datasets) {
         
         # run plink
         cmnd0 = paste(plink,"--bfile",study_data_fil,"--no-pheno --pheno",temp_file_phenotypes,
-                      "--assoc qt-means --allow-no-sex --out", temp_file_gentypefrq,sep=" ")
+                      "--assoc qt-means --nonfounders --allow-no-sex --out", temp_file_gentypefrq,sep=" ") # in absolutely all individuals
         # allow-no-sex is necessary, otherwise all phenotypes are ignored..
         system(cmnd0,intern = F); system("wait",intern = F)
         
