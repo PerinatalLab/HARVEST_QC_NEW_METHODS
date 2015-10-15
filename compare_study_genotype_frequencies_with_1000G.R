@@ -10,17 +10,19 @@
 plink = "/home/jonasbac/results/moba24-reference-script_5010jb/plink"
 
 ### outputs
-working_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/WORK/"
+working_dir = "/home/jonasbac/results/moba12-reference-script_5014jb/data/WORK/"
 
 ### inputs
-study_data_dir = "/home/jonasbac/results/moba24-reference-script_5010jb/data/"
+study_data_dir = "/home/jonasbac/results/moba12-reference-script_5014jb/data/"
 # the study file which is analysed
 study_data_root = "merge-qc"
 study_data_fil = paste(study_data_dir,study_data_root,sep="")
 # a list of all individuals in duplicated samples (two-column format: FID, IID)
-study_dupl_ind = paste(study_data_dir,"duplicated_individuals.txt",sep="")
+study_dupl_ind = paste(study_data_dir,"duplicated_individuals.fam",sep="")
 # what are the duplicate pairs (which individual belongs to which individual)
-study_dupl_match = "/media/local-disk/common/gsexport/moba_24v10_n12874inc135regdup9dualdup/SentrixIDs_moba24_135regdup.txt"
+study_dupl_match = "/media/local-disk/common/gsexport/moba_12v11_n20667inc222regdup21ratio_2hapmap/SentrixIDs_moba12_222regdup.txt"
+#"/media/local-disk/common/gsexport/moba_24v10_n12874inc135regdup9dualdup/SentrixIDs_moba24_135regdup.txt"
+
 # other files for updating info
 recode_famids = "/media/local-disk/common/gsexport/recode-famid-total-moba.fam"
 recode_gender = "/media/local-disk/common/gsexport/recode-sex-total-moba.fam"
@@ -33,6 +35,15 @@ temp_file_allPhe =  paste(working_dir,"tempFile_randomPhenotype_ALLsamples.txt",
 temp_file_gntpCntsALL = paste(working_dir,"tempFile_gntpCounts_absolutelyALLindividuals",sep="")
 # output file
 study_ALL_freqs  = paste(working_dir,study_data_root,"_studyALLsamples_gntpFrequencies.txt",sep="")
+
+
+# read the duplicate-match info. prepare fam file
+tmp = read.table(study_dupl_match,stringsAsFactors = F)
+block1 = data.frame(FID=tmp$V1,IID=tmp$V1,stringsAsFactors = F)
+block2 = data.frame(FID=tmp$V2,IID=tmp$V2,stringsAsFactors = F)
+blocks = rbind(block1,block2)
+write.table(blocks,study_dupl_ind,row.names=F,col.names=F,quote = F,sep="\t")
+
 
 # generate a random phenotype (necessary to run plink command)
 fam_all = read.table(paste(study_data_fil,".fam",sep=""),h=F,stringsAsFactors = F)
@@ -53,7 +64,6 @@ colnames(tmp2) = c("SNP","AA","AB","BB")
 bim = read.table(paste(study_data_fil,".bim",sep=""),stringsAsFactors = F,h=F)
 ALLInd_gntpCnts = merge(tmp2,bim,by.x="SNP",by.y="V2",all.x=T)
 write.table(ALLInd_gntpCnts, study_ALL_freqs, row.names=F,col.names=T,quote=F,sep="\t")
-
 
 # select the chromosome to work on
 #chr = 1
